@@ -16,14 +16,14 @@ Agentic Honey-Pot is an AI-powered system that identifies scam messages and extr
 
 **Lightweight & Easy: Simple setup and deployment without heavy dependencies.
 
-# Tech Stack
+##Tech Stack
 
 **Python – Core logic and processing
 **Flask – Web framework for API
 **Regular Expressions (re) – Pattern extraction from messages
 **REST API – For automated integration
 
-# How to Use the API
+## How to Use the API
 
 **Endpoint: POST /analyze
 
@@ -33,14 +33,14 @@ x-api-key: hello
 Content-Type: application/json
 
 
-# Sample Request 1:
+## Sample Request 1:
 
 {
   "message": "Urgent! Click https://fakebank.com to win a prize. Pay to scammer@upi"
 }
 
 
-# Sample Response 1:
+## Sample Response 1:
 
 {
   "received_message": "urgent! click https://fakebank.com to win a prize. pay to scammer@upi",
@@ -53,7 +53,7 @@ Content-Type: application/json
   }
 }
 
-# Run Locally
+## Run Locally
 bash-
 Install dependencies
 pip install flask
@@ -63,7 +63,7 @@ Start the application
 python app.py
 
 
-# Test using PowerShell
+## Test using PowerShell
 
 Invoke-RestMethod -Uri "http://127.0.0.1:5000/analyze" `
 -Method POST `
@@ -71,7 +71,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:5000/analyze" `
 -ContentType "application/json" `
 -Body '{"message":"Urgent! Click https://fakebank.com now"}'
 
-# Project Structure
+## Project Structure
 agentic-honeypot/
 ├── app.py             # Main Flask application
 ├── requirements.txt   # Dependencies
