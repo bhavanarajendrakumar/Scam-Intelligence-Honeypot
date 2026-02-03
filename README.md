@@ -25,7 +25,7 @@ Agentic Honey-Pot is an AI-powered system that identifies scam messages and extr
 
 ## System Architecture
 
-![Agentic Honey-Pot Flow]
+![Agentic Honey-Pot Flow](https://raw.githubusercontent.com/bhavanarajendrakumar/Scam-Intelligence-Honeypot/50552cb60042ad0677e464a7d191c82acde584cd/honeypot_api/flowchart.png)
 
 ## How to Use the API
 
