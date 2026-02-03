@@ -23,6 +23,10 @@ Agentic Honey-Pot is an AI-powered system that identifies scam messages and extr
 **Regular Expressions (re) – Pattern extraction from messages
 **REST API – For automated integration
 
+## System Architecture
+
+![Agentic Honey-Pot Flow](images/agentic_flowchart.png)
+
 ## How to Use the API
 
 **Endpoint: POST /analyze
