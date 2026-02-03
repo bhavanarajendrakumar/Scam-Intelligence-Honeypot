@@ -3,16 +3,11 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# 🔑 API key for hackathon tester
 API_KEY = "hello"
 
-# In-memory conversation store
 conversations = {}
 
-
-# ---------------------------
 # Scam Intent Detection
-# ---------------------------
 def detect_scam_intent(message):
     scam_patterns = [
         r'otp',
@@ -32,10 +27,7 @@ def detect_scam_intent(message):
             return True
     return False
 
-
-# ---------------------------
 # Intelligence Extraction
-# ---------------------------
 def extract_intel(message, convo):
     urls = re.findall(r'https?://\S+|www\.\S+', message)
     upi_ids = re.findall(r'\b[\w.-]+@[\w.-]+\b', message)
@@ -50,10 +42,7 @@ def extract_intel(message, convo):
     convo["extracted"]["upi_ids"] = list(set(convo["extracted"]["upi_ids"]))
     convo["extracted"]["bank_accounts"] = list(set(convo["extracted"]["bank_accounts"]))
 
-
-# ---------------------------
 # Honey-Pot Agent Persona
-# ---------------------------
 def honey_pot_agent_reply(history):
     prompts = [
         "Oh okay… I am not very good with these things. Can you help me step by step?",
@@ -71,7 +60,6 @@ def honey_pot_agent_reply(history):
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    # ✅ Hackathon portal sends x-api-key header
     api_key = request.headers.get("x-api-key")
 
     if api_key != API_KEY:
@@ -137,3 +125,4 @@ def analyze():
 # 🚀 Required for deployment
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
