@@ -13,12 +13,18 @@ def analyze():
 
         data = request.get_json(force=True)
 
-        if not data or "message" not in data:
+        # ---- FIX FOR HACKATHON TESTER FORMAT ----
+        # They send: { sessionId, message: { text: "..."} }
+        if "message" in data and isinstance(data["message"], dict):
+            message = data["message"].get("text", "").lower()
+        else:
+            message = data.get("message", "").lower()
+        # ----------------------------------------
+
+        if not message:
             return jsonify({"error": "Invalid request format"}), 400
 
-        message = data["message"].lower()
-
-        # Simple logic to decide reply (you can improve later)
+        # Decide reply (honeypot logic)
         if "block" in message or "suspend" in message:
             reply_text = "Why is my account being suspended?"
         elif "otp" in message:
@@ -26,6 +32,7 @@ def analyze():
         else:
             reply_text = "Can you explain more?"
 
+        # ---- EXACT EXPECTED OUTPUT ----
         return jsonify({
             "status": "success",
             "reply": reply_text
