@@ -1,56 +1,38 @@
 from flask import Flask, jsonify, request
-import re
 
 app = Flask(__name__)
 
 API_KEY = "hello"
-conversations = {}
-
-def detect_scam_type(message):
-    if re.search(r'otp|upi', message):
-        return "otp_scam"
-    elif re.search(r'account.*(block|suspend)', message):
-        return "account_block_scam"
-    elif re.search(r'click.*link|verify', message):
-        return "phishing_scam"
-    else:
-        return "unknown"
-
-def generate_honeypot_reply(scam_type):
-    replies = {
-        "otp_scam": "Why do you need my OTP?",
-        "account_block_scam": "Why is my account being suspended?",
-        "phishing_scam": "Where exactly should I click?",
-        "unknown": "Can you explain this more clearly?"
-    }
-    return replies.get(scam_type, "I don’t understand your message.")
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    api_key = request.headers.get("x-api-key")
-    if api_key != API_KEY:
-        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        api_key = request.headers.get("x-api-key")
+        if api_key != API_KEY:
+            return jsonify({"error": "Unauthorized"}), 401
 
-    data = request.get_json()
-    if not data or "message" not in data:
-        return jsonify({"error": "Invalid request format"}), 400
+        data = request.get_json(force=True)
 
-    message = data["message"].lower()
-    convo_id = data.get("sessionId", "default")
+        if not data or "message" not in data:
+            return jsonify({"error": "Invalid request format"}), 400
 
-    if convo_id not in conversations:
-        conversations[convo_id] = {"history": []}
+        message = data["message"].lower()
 
-    conversations[convo_id]["history"].append(message)
+        # Simple logic to decide reply (you can improve later)
+        if "block" in message or "suspend" in message:
+            reply_text = "Why is my account being suspended?"
+        elif "otp" in message:
+            reply_text = "Why do you need my OTP?"
+        else:
+            reply_text = "Can you explain more?"
 
-    scam_type = detect_scam_type(message)
+        return jsonify({
+            "status": "success",
+            "reply": reply_text
+        }), 200
 
-    reply = generate_honeypot_reply(scam_type)
-
-    return jsonify({
-        "status": "success",
-        "reply": reply
-    }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
