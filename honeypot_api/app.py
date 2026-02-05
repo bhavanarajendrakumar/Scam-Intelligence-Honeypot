@@ -1,39 +1,3 @@
-import re
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-conversations = {}
-API_KEY = "hello"
-
-def detect_scam_intent(message):
-    scam_patterns = [
-        r'otp',
-        r'account.*block',
-        r'urgent.*action',
-        r'click.*link',
-        r'prize|lottery|winner',
-        r'kyc.*update',
-        r'upi.*send',
-        r'verify.*bank',
-        r'limited.*offer',
-        r'password.*reset',
-        r'bank account will be blocked'
-    ]
-    for pattern in scam_patterns:
-        if re.search(pattern, message):
-            return True
-    return False
-
-def extract_intel(message, convo):
-    urls = re.findall(r'https?://\S+|www\.\S+', message)
-    upi_ids = re.findall(r'\b[\w.-]+@[\w.-]+\b', message)
-    bank_accounts = re.findall(r'\b\d{9,18}\b', message)
-
-    convo["extracted"]["urls"].extend(urls)
-    convo["extracted"]["upi_ids"].extend(upi_ids)
-    convo["extracted"]["bank_accounts"].extend(bank_accounts)
-
 @app.route("/analyze", methods=["POST"])
 def analyze():
     api_key = request.headers.get("x-api-key")
@@ -46,7 +10,6 @@ def analyze():
     if not data or "message" not in data:
         return jsonify({"error": "Invalid request format"}), 400
 
-    # FIX FOR YOUR SCREENSHOT FORMAT
     message = str(data["message"]["text"]).lower()
     convo_id = data.get("sessionId", "default")
 
@@ -73,17 +36,10 @@ def analyze():
     is_scam = detect_scam_intent(message)
     convo["scam_detected"] = is_scam
 
-    scam_type = "Potential phishing" if is_scam else "Benign message"
-
+   
     response = {
-        "is_scam": is_scam,
-        "confidence_score": 0.85 if is_scam else 0.15,
-        "scam_type": scam_type,
-        "extracted_entities": {
-            "phone_numbers": [],
-            "urls": convo["extracted"]["urls"],
-            "bank_names": []
-        }
+        "status": "success",
+        "reply": "Why is my account being suspended?"
     }
 
     return jsonify(response), 200
