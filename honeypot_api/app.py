@@ -1,80 +1,56 @@
-import re
 from flask import Flask, jsonify, request
+import re
 
 app = Flask(__name__)
 
-conversations = {}
 API_KEY = "hello"
+conversations = {}
 
-def detect_scam_intent(message):
-    scam_patterns = [
-        r'otp',
-        r'account.*block',
-        r'urgent.*action',
-        r'click.*link',
-        r'prize|lottery|winner',
-        r'kyc.*update',
-        r'upi.*send',
-        r'verify.*bank',
-        r'limited.*offer',
-        r'password.*reset',
-        r'bank account will be blocked'
-    ]
-    for pattern in scam_patterns:
-        if re.search(pattern, message):
-            return True
-    return False
+def detect_scam_type(message):
+    if re.search(r'otp|upi', message):
+        return "otp_scam"
+    elif re.search(r'account.*(block|suspend)', message):
+        return "account_block_scam"
+    elif re.search(r'click.*link|verify', message):
+        return "phishing_scam"
+    else:
+        return "unknown"
 
-def extract_intel(message, convo):
-    urls = re.findall(r'https?://\S+|www\.\S+', message)
-    upi_ids = re.findall(r'\b[\w.-]+@[\w.-]+\b', message)
-    bank_accounts = re.findall(r'\b\d{9,18}\b', message)
-
-    convo["extracted"]["urls"].extend(urls)
-    convo["extracted"]["upi_ids"].extend(upi_ids)
-    convo["extracted"]["bank_accounts"].extend(bank_accounts)
+def generate_honeypot_reply(scam_type):
+    replies = {
+        "otp_scam": "Why do you need my OTP?",
+        "account_block_scam": "Why is my account being suspended?",
+        "phishing_scam": "Where exactly should I click?",
+        "unknown": "Can you explain this more clearly?"
+    }
+    return replies.get(scam_type, "I don’t understand your message.")
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
     api_key = request.headers.get("x-api-key")
-
     if api_key != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     if not data or "message" not in data:
         return jsonify({"error": "Invalid request format"}), 400
 
-    message = str(data["message"]["text"]).lower()
+    message = data["message"].lower()
     convo_id = data.get("sessionId", "default")
 
     if convo_id not in conversations:
-        conversations[convo_id] = {
-            "history": [],
-            "scam_detected": False,
-            "agent_active": False,
-            "extracted": {
-                "urls": [],
-                "upi_ids": [],
-                "bank_accounts": []
-            },
-            "turn_count": 0
-        }
+        conversations[convo_id] = {"history": []}
 
-    convo = conversations[convo_id]
-    convo["history"].append(message)
-    convo["turn_count"] += 1
+    conversations[convo_id]["history"].append(message)
 
-    extract_intel(message, convo)
-    convo["extracted"]["urls"] = list(set(convo["extracted"]["urls"]))
+    scam_type = detect_scam_type(message)
 
-    is_scam = detect_scam_intent(message)
-    convo["scam_detected"] = is_scam
+    reply = generate_honeypot_reply(scam_type)
 
-    response = {
+    return jsonify({
         "status": "success",
-        "reply": "Why is my account being suspended?"
-    }
+        "reply": reply
+    }), 200
 
-    return jsonify(response), 200
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
