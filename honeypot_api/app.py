@@ -53,7 +53,6 @@ def honey_pot_agent_reply(history):
         "I got a message saying transaction failed. Can you send the details again?",
         "I am a bit confused. Which bank account should I transfer to?",
     ]
-
     return prompts[len(history) % len(prompts)]
 
 @app.route("/analyze", methods=["POST"])
@@ -63,12 +62,12 @@ def analyze():
     if api_key != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data or "message" not in data:
         return jsonify({"error": "Invalid request format"}), 400
 
-    message = data["message"].lower()
+    message = str(data["message"]).lower()
     convo_id = data.get("conversation_id", "default")
 
     if convo_id not in conversations:
