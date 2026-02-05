@@ -1,7 +1,7 @@
 import re
 from flask import Flask, jsonify, request
 
-app = Flask(__name__)   # <-- THIS MUST COME FIRST
+app = Flask(__name__)
 
 conversations = {}
 API_KEY = "hello"
@@ -17,7 +17,8 @@ def detect_scam_intent(message):
         r'upi.*send',
         r'verify.*bank',
         r'limited.*offer',
-        r'password.*reset'
+        r'password.*reset',
+        r'bank account will be blocked'
     ]
     for pattern in scam_patterns:
         if re.search(pattern, message):
@@ -45,8 +46,9 @@ def analyze():
     if not data or "message" not in data:
         return jsonify({"error": "Invalid request format"}), 400
 
-    message = str(data["message"]).lower()
-    convo_id = data.get("conversation_id", "default")
+    # FIX FOR YOUR SCREENSHOT FORMAT
+    message = str(data["message"]["text"]).lower()
+    convo_id = data.get("sessionId", "default")
 
     if convo_id not in conversations:
         conversations[convo_id] = {
