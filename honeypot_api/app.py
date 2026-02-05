@@ -59,7 +59,7 @@ def honey_pot_agent_reply(history):
 def analyze():
     api_key = request.headers.get("x-api-key")
 
-    if api_key != API_KEY:
+    if not api_key or api_key.strip() != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json(silent=True)
@@ -115,3 +115,4 @@ def analyze():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
